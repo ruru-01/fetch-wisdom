@@ -2,18 +2,22 @@
 import { onMounted, ref } from 'vue';
 
 // 状態（リアクティブな変数）を定義
-const quote = ref('')
-const loading = ref(true)
+const content = ref('')
+const author = ref('')
+const loading = ref(false)
 
 // APIからデータを取得する非同期関数
 const fetchQuote = async () => {
   loading.value = true
   try {
-    const res = await fetch('https://api.adviceslip.com/advice')
+    const res = await fetch('https://dummyjson.com/quotes/random')
     const data = await res.json()
-    quote.value = data.slip.advice
+
+    content.value = data.quote // 名言
+    author.value = data.author // 著書名
   } catch (error) {
-    quote.value = '知恵の取得に失敗しました'
+    quote.value = '名言の取得に失敗しました。'
+    console.error(error)
   } finally {
     loading.value = false
   }
@@ -27,9 +31,13 @@ onMounted(fetchQuote)
   <main class="container">
     <div class="card">
       <h1 class="label">FETCH WISDOM</h1>
+
       <div class="quote-area">
-        <p v-if="loading" class="loading">Fetching</p>
-        <p v-else class="quote-text">"{{ quote }}"</p>
+        <p v-if="loading" class="loading">Fetching...</p>
+        <div v-else class="quote-content">
+          <p class="text">{{ content }}</p>
+          <p class="author">— {{ author }}</p>
+        </div>
       </div>
       <button @click="fetchQuote" :disabled="loading" class="btn">
         NEXT WISDOM
@@ -47,10 +55,9 @@ onMounted(fetchQuote)
   background-color: #F9F8F6;
   font-family: ui-monospace, monospace;
 }
-
 .card {
   text-align: center;
-  max-width: 500px;
+  max-width: 600px;
   padding: 2rem;
 }
 
@@ -60,22 +67,28 @@ onMounted(fetchQuote)
   color: #94a3b8;
   margin-bottom: 2rem;
 }
-
 .quote-area {
-  min-height: 120px;
+  min-height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-.quote-text {
+/* 名言 */
+.text {
   font-family: serif;
   font-style: italic;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: #1e293b;
-  line-height: 1.6;
+  line-height: 1.4;
+  margin-bottom: 1rem;
 }
-
+/* 著書名 */
+.author {
+  font-size: 1rem;
+  color: #64748b;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
 .btn {
   margin-top: 2rem;
   padding: 0.5rem 1.5rem;
@@ -86,16 +99,13 @@ onMounted(fetchQuote)
   letter-spacing: 0.1em;
   transition: all 0.3s;
 }
-
 .btn:hover:not(:disabled) {
   background-color: #0f172a;
   color: white;
 }
-
 .btn:disabled {
   opacity: 0.5;
 }
-
 @keyframes pulse {
   50% { opacity: .5; }
 }
