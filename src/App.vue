@@ -1,12 +1,26 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
-// 状態（リアクティブな変数）を定義
+// --- 変数定義 ---
 const content = ref('')
 const author = ref('')
 const translatedText = ref('')
 const loading = ref(false)
 const translating = ref(false)
+const temp = ref(null)
+const weatherCode = ref(null)
+
+// 天気を取得する関数（東京：北緯35.6895, 東経139.6917）
+const fetchWeather = async () => {
+  try {
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current_weather=true')
+    const data = await res.json()
+    temp.value = data.current_weather.temperature
+    weatherCode.value = data.current_weather.weathercode
+  } catch (error) {
+    console.error('天気の取得に失敗しました。')
+  }
+}
 
 // APIからデータを取得する非同期関数
 const fetchQuote = async () => {
@@ -41,11 +55,21 @@ const translateQuote = async () => {
 }
 
 // 画面が表示された時に実行
-onMounted(fetchQuote)
+onMounted(() => {
+  fetchQuote()
+  fetchWeather()
+})
+
 </script>
 
 <template>
   <main class="container">
+
+    <div class="weather-badge" v-if="temp !== null">
+      <span class="city">TOKYO</span>
+      <span>{{ temp }}°C</span>
+    </div>
+
     <div class="card">
       <h1 class="label">FETCH WISDOM</h1>
       <div class="quote-area">
@@ -69,6 +93,24 @@ onMounted(fetchQuote)
 </template>
 
 <style scoped>
+.weather-badge {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.city {
+  font-weight: bold;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2px;
+}
+
 .container {
   min-height: 100vh;
   display: flex;
