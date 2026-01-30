@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 
 // --- 変数定義 ---
 const content = ref('')
@@ -54,6 +54,11 @@ const translateQuote = async () => {
   }
 }
 
+const themeClass = computed(() => {
+  if (temp.value === null) return 'theme-default';
+  return temp.value >= 20 ? 'theme-warm' : 'theme-cool';
+})
+
 // 画面が表示された時に実行
 onMounted(() => {
   fetchQuote()
@@ -63,7 +68,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="container">
+  <main :class="['container', themeClass]">
 
     <div class="weather-badge" v-if="temp !== null">
       <span class="city">TOKYO</span>
@@ -93,6 +98,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.theme-default { background-color: #f8fafc; }
+.theme-warm { background-color: #fff7ed; }
+.theme-cool { background-color: #f0f9ff; }
+
 .weather-badge {
   position: absolute;
   top: 2rem;
@@ -116,8 +125,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #F9F8F6;
   font-family: ui-monospace, monospace;
+  transition: background-color 0.5s ease;
 }
 
 .card {
