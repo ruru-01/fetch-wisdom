@@ -9,6 +9,7 @@ const loading = ref(false)
 const translating = ref(false)
 const temp = ref(null)
 const weatherCode = ref(null)
+const copyLabel = ref('COPY TEXT')
 
 // 天気を取得する関数（東京：北緯35.6895, 東経139.6917）
 const fetchWeather = async () => {
@@ -65,6 +66,18 @@ onMounted(() => {
   fetchWeather()
 })
 
+const copyToClipboard = async () => {
+  const text =`"${content.value}" - ${author.value}`
+  try {
+    await navigator.clipboard.writeText(text)
+    copyLabel.value = 'COPIED!'
+    setTimeout(() => {
+      copyLabel.value = 'COPY TEXT'
+    }, 2000)
+  } catch (error) {
+    console.error('コピーに失敗しました。', error)
+  }
+}
 </script>
 
 <template>
@@ -91,6 +104,9 @@ onMounted(() => {
         </button>
         <button @click="translateQuote" :disabled="loading || translating" class="btn secondary">
           {{ translating ? 'TRANSLATING...' : 'TRANSLATE TO JP'  }}
+        </button>
+        <button @click="copyToClipboard" :disabled="loading || !content" class="btn secondary">
+          {{ copyLabel }}
         </button>
       </div>
     </div>
