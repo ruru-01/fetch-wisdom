@@ -10,6 +10,7 @@ const translating = ref(false)
 const temp = ref(null)
 const weatherCode = ref(null)
 const copyLabel = ref('COPY TEXT')
+const bgImage = ref('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80')
 
 // 天気を取得する関数（東京：北緯35.6895, 東経139.6917）
 const fetchWeather = async () => {
@@ -27,11 +28,26 @@ const fetchWeather = async () => {
 const fetchQuote = async () => {
   loading.value = true
   translatedText.value = '' // 新しい名言を取得するときは翻訳をリセット
+
   try {
     const res = await fetch('https://dummyjson.com/quotes/random')
     const data = await res.json()
+    const keyword = data.quote.split(' ')[0]
+    const newImageUrl = `https://loremflickr.com/1920/1080/${keyword}?lock=${Math.floor(Math.random() * 1000)}`
+
+    // 画像の事前読み込み
+    await new Promise((resolve) => {
+      const img = new Image()
+      img.src = newImageUrl
+      img.onload = resolve // 画像のダウンロードが終わったら次に進む
+      img.onerror = resolve // 失敗しても止まらないように進む
+    })
+
+    // 画像と文字を同時にセット
     content.value = data.quote // 名言
     author.value = data.author // 著書名
+    bgImage.value = newImageUrl
+
   } catch (error) {
     content.value = '名言の取得に失敗しました。'
     console.error(error)
@@ -81,7 +97,7 @@ const copyToClipboard = async () => {
 </script>
 
 <template>
-  <main :class="['container', themeClass]">
+  <main :class="['container', themeClass]" :style="{ backgroundImage: `linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), url(${bgImage})` }">
 
     <div class="weather-badge" v-if="temp !== null">
       <span class="city">TOKYO</span>
@@ -143,6 +159,9 @@ const copyToClipboard = async () => {
   justify-content: center;
   font-family: ui-monospace, monospace;
   transition: background-color 0.5s ease;
+  background-size: cover;
+  background-position: center;
+  transition: background-color 0.8s ease, background-image 1.0s ease;
 }
 
 .card {
