@@ -11,6 +11,7 @@ const temp = ref(null)
 const weatherCode = ref(null)
 const copyLabel = ref('COPY TEXT')
 const bgImage = ref('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80')
+const favorites = ref(JSON.parse(localStorage.getItem('myFavoriteQuotes') || '[]'))
 
 // 天気を取得する関数（東京：北緯35.6895, 東経139.6917）
 const fetchWeather = async () => {
@@ -94,38 +95,79 @@ const copyToClipboard = async () => {
     console.error('コピーに失敗しました。', error)
   }
 }
+
+// お気に入りに追加する関数
+const addToFavorites = () => {
+  const newFav = {
+    content: content.value,
+    author: author.value,
+    translated: translatedText.value
+  }
+
+  // 重複チェック（同じ名言がなければ追加）
+  if(!favorites.value.some(f => f.content === newFav.content)) {
+    favorites.value.push(newFav)
+    localStorage.setItem('myFavoriteQuotes', JSON.stringify(favorites.value))
+  }
+}
+
+// お気に入りから削除する関数
+const removeFavorite = (index) => {
+  favorites.value.splice(index, 1)
+  localStorage.setItem('myFavoriteQuotes', JSON.stringify(favorites.value))
+}
+
 </script>
 
 <template>
   <main :class="['container', themeClass]" :style="{ backgroundImage: `linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), url(${bgImage})` }">
-
     <div class="weather-badge" v-if="temp !== null">
       <span class="city">TOKYO</span>
       <span>{{ temp }}°C</span>
     </div>
 
-    <div class="card">
-      <h1 class="label">FETCH WISDOM</h1>
-      <div class="quote-area">
-        <p v-if="loading" class="loading">Fetching...</p>
-        <div v-else class="quote-content">
-          <p class="text">{{ content }}</p>
-          <p v-if="translatedText" class="translated-text">{{ translatedText }}</p>
-          <p class="author">— {{ author }}</p>
+    <div class="card-wrapper">
+      <div class="card">
+        <h1 class="label">FETCH WISDOM</h1>
+
+        <div class="quote-area">
+          <p v-if="loading" class="loading">Fetching...</p>
+          <div v-else class="quote-content">
+            <p class="text">{{ content }}</p>
+            <p v-if="translatedText" class="translated-text">{{ translatedText }}</p>
+            <p class="author">— {{ author }}</p>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button @click="fetchQuote" :disabled="loading" class="btn">
+            NEXT WISDOM
+          </button>
+          <button @click="translateQuote" :disabled="loading || translating" class="btn secondary">
+            {{ translating ? 'TRANSLATING...' : 'TRANSLATE TO JP'  }}
+          </button>
+          <button @click="copyToClipboard" :disabled="loading || !content" class="btn secondary">
+            {{ copyLabel }}
+          </button>
+          <button @click="addToFavorites" :disabled="loading || !content" class="btn secondary">
+            SAVE
+          </button>
         </div>
       </div>
-      <div class="button-group">
-        <button @click="fetchQuote" :disabled="loading" class="btn">
-          NEXT WISDOM
-        </button>
-        <button @click="translateQuote" :disabled="loading || translating" class="btn secondary">
-          {{ translating ? 'TRANSLATING...' : 'TRANSLATE TO JP'  }}
-        </button>
-        <button @click="copyToClipboard" :disabled="loading || !content" class="btn secondary">
-          {{ copyLabel }}
-        </button>
+
+      <div v-if="favorites.length > 0" class="favorites-section">
+        <h3>FAVORITE QUOTES</h3>
+        <ul class="fav-list">
+          <li v-for="(fav, index) in favorites" :key="index" class="fav-item">
+            <p>"{{ fav.content }}"</p>
+            <button @click="removeFavorite(index)" class="delete-btn">×</button>
+          </li>
+        </ul>
       </div>
     </div>
+
+
+
   </main>
 </template>
 
@@ -150,6 +192,48 @@ const copyToClipboard = async () => {
   font-weight: bold;
   border-bottom: 1px solid #e2e8f0;
   margin-bottom: 2px;
+}
+
+.favorites-section {
+  margin-top: 4rem;
+  width: 100%;
+  max-width: 600px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 2rem;
+}
+
+.card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-height: 90vh; /* 画面からはみ出さないように */
+  overflow-y: auto; /* お気に入りが増えたらスクロール可能に */
+  padding: 2rem;
+}
+
+.fav-list {
+  list-style: none;
+  padding: 0;
+}
+
+.fav-item {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1.2rem;
 }
 
 .container {
