@@ -251,7 +251,17 @@ const removeFavorite = (index) => {
 .card {
   text-align: center;
   max-width: 600px;
-  padding: 2rem;
+  padding: 3rem;
+
+  /* グラスモフィズム設定 */
+  background: rgba(255, 255, 255, 0.15); /* 背景を透かす */
+  backdrop-filter: blur(12px); /* 背後をぼかす */
+  -webkit-backdrop-filter: blur(12px); /* Safari用 */
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* 影をつける */
+
 }
 
 .label {
@@ -271,10 +281,13 @@ const removeFavorite = (index) => {
 .text {
   font-family: serif;
   font-style: italic;
-  font-size: 1.6rem;
-  color: #1e293b;
-  line-height: 1.4;
-  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #0f172a;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .translated-text {
