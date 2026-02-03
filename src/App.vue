@@ -218,14 +218,20 @@ const removeFavorite = (index) => {
 }
 
 .fav-item {
-  background: rgba(255, 255, 255, 0.5);
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  padding: 1.2rem;
+  margin-bottom: 0.8rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
+  transition: transform 0.2s;
+}
+
+.fav-item:hover {
+  transform: scale(1.02);
 }
 
 .delete-btn {
@@ -317,13 +323,22 @@ const removeFavorite = (index) => {
 }
 
 .btn {
-  padding: 0.5rem 1.5rem;
+  padding: 0.6rem 1.6rem;
   border: 1px solid #0f172a;
-  background: none;
+  border-radius: 12px;
+  background: white;
   cursor: pointer;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-3px); /* 上にふわっと浮く */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* 影を広げて浮遊感を出す */
+  background-color: #0f172a;
+  color: white;
 }
 
 .btn.secondary {
@@ -331,15 +346,10 @@ const removeFavorite = (index) => {
   color: #64748b;
 }
 
-.btn:hover:not(:disabled) {
-  background-color: #0f172a;
-  color: white;
-}
-
 .btn.secondary:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  color: #1e293b;
-  border-color: #1e293b;
+  background-color: rgba(15, 23, 42, 0.05);
+  color: #0f172a;
+  border-color: #0f172a;
 }
 
 .btn:disabled {
