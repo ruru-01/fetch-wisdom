@@ -9,7 +9,7 @@ const loading = ref(false)
 const translating = ref(false)
 const temp = ref(null)
 const weatherCode = ref(null)
-const copyLabel = ref('COPY TEXT')
+const copyLabel = ref('こっそり持ち帰る')
 const bgImage = ref('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80')
 const favorites = ref(JSON.parse(localStorage.getItem('myFavoriteQuotes') || '[]'))
 
@@ -87,12 +87,12 @@ const copyToClipboard = async () => {
   const text =`"${content.value}" - ${author.value}`
   try {
     await navigator.clipboard.writeText(text)
-    copyLabel.value = 'COPIED!'
+    copyLabel.value = '持ち帰りました!'
     setTimeout(() => {
-      copyLabel.value = 'COPY TEXT'
+      copyLabel.value = 'こっそり持ち帰る'
     }, 2000)
   } catch (error) {
-    console.error('コピーに失敗しました。', error)
+    console.error('失敗しちゃいました。', error)
   }
 }
 
@@ -122,16 +122,16 @@ const removeFavorite = (index) => {
 <template>
   <main :class="['container', themeClass]" :style="{ backgroundImage: `linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), url(${bgImage})` }">
     <div class="weather-badge" v-if="temp !== null">
-      <span class="city">TOKYO</span>
+      <span class="city">本日の東京のご機嫌</span>
       <span>{{ temp }}°C</span>
     </div>
 
     <div class="card-wrapper">
       <div class="card">
-        <h1 class="label">FETCH WISDOM</h1>
+        <h1 class="label">今日の魂に響く名言</h1>
 
         <div class="quote-area">
-          <p v-if="loading" class="loading">Fetching...</p>
+          <p v-if="loading" class="loading">ちょっと待って、今いいこと言うから...</p>
           <div v-else class="quote-content">
             <p class="text">{{ content }}</p>
             <p v-if="translatedText" class="translated-text">{{ translatedText }}</p>
@@ -141,26 +141,26 @@ const removeFavorite = (index) => {
 
         <div class="button-group">
           <button @click="fetchQuote" :disabled="loading" class="btn">
-            NEXT WISDOM
+            次のお告げを聞く
           </button>
           <button @click="translateQuote" :disabled="loading || translating" class="btn secondary">
-            {{ translating ? 'TRANSLATING...' : 'TRANSLATE TO JP'  }}
+            {{ translating ? '魔法をかけてます...' : '魔法の翻訳機を起動！'  }}
           </button>
           <button @click="copyToClipboard" :disabled="loading || !content" class="btn secondary">
             {{ copyLabel }}
           </button>
           <button @click="addToFavorites" :disabled="loading || !content" class="btn secondary">
-            SAVE
+            一生忘れない
           </button>
         </div>
       </div>
 
       <div v-if="favorites.length > 0" class="favorites-section">
-        <h3>FAVORITE QUOTES</h3>
+        <h3>宝箱にしまった言葉たち</h3>
         <ul class="fav-list">
           <li v-for="(fav, index) in favorites" :key="index" class="fav-item">
             <p>"{{ fav.content }}"</p>
-            <button @click="removeFavorite(index)" class="delete-btn">×</button>
+            <button @click="removeFavorite(index)" class="delete-btn">捨てちゃう</button>
           </li>
         </ul>
       </div>
@@ -176,16 +176,22 @@ const removeFavorite = (index) => {
 .theme-warm { background-color: #fff7ed; }
 .theme-cool { background-color: #f0f9ff; }
 
+/** --- 天気バッジ --- */
 .weather-badge {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 0.8rem 1.2rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 0.8rem;
+  color: #1e293b;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  color: #94a3b8;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  z-index: 100;
 }
 
 .city {
@@ -194,40 +200,13 @@ const removeFavorite = (index) => {
   margin-bottom: 2px;
 }
 
-.favorites-section {
-  margin-top: 4rem;
-  width: 100%;
-  max-width: 600px;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 2rem;
-}
-
+/** --- メインカード --- */
 .card-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-height: 90vh; /* 画面からはみ出さないように */
-  overflow-y: auto; /* お気に入りが増えたらスクロール可能に */
-  padding: 2rem;
-}
-
-.fav-list {
-  list-style: none;
-  padding: 0;
-}
-
-.fav-item {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(4px);
-  padding: 1.2rem;
-  margin-bottom: 0.8rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: transform 0.2s;
+  width: 90%;
+  max-width: 1000px;
 }
 
 .fav-item:hover {
@@ -242,31 +221,32 @@ const removeFavorite = (index) => {
   font-size: 1.2rem;
 }
 
+/** --- レイアウト基盤 --- */
 .container {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-family: ui-monospace, monospace;
-  transition: background-color 0.5s ease;
+  justify-content: flex-start; /* 上から順に並べる */
+  padding-top: 5vh;
+  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
   background-size: cover;
   background-position: center;
-  transition: background-color 0.8s ease, background-image 1.0s ease;
+  background-attachment: fixed; /* 背景を固定して高級感を出す */
+  transition: background-image 1.2s ease-in-out;
 }
 
 .card {
   text-align: center;
-  max-width: 600px;
-  padding: 3rem;
-
-  /* グラスモフィズム設定 */
-  background: rgba(255, 255, 255, 0.15); /* 背景を透かす */
-  backdrop-filter: blur(12px); /* 背後をぼかす */
-  -webkit-backdrop-filter: blur(12px); /* Safari用 */
-
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 24px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* 影をつける */
+  width: 100%;
+  max-width: 650px;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
 
 }
 
@@ -284,27 +264,25 @@ const removeFavorite = (index) => {
   justify-content: center;
 }
 
+/** --- 名言エリア --- */
 .text {
-  font-family: serif;
+  font-family: "Times New Roman", serif;
   font-style: italic;
-  font-size: 1.8rem;
-  color: #0f172a;
-  font-weight: 300;
+  font-size: 2rem;
   line-height: 1.6;
-  letter-spacing: 0.05em;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  color: #0f172a;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
 }
 
 .translated-text {
-  font-family: sans-serif;
-  font-size: 1rem;
-  color: #475569;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-  background-color: #f1f5f9;
-  padding: 1rem;
-  border-radius: 8px;
+  font-size: 1.1rem;
+  color: #334155;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 1.5rem;
+  border-radius: 20px;
+  margin: 1.5rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .author {
@@ -317,44 +295,107 @@ const removeFavorite = (index) => {
 /* ボタンエリア */
 .button-group {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: center;
   margin-top: 3rem;
 }
 
 .btn {
-  padding: 0.6rem 1.6rem;
-  border: 1px solid #0f172a;
-  border-radius: 12px;
-  background: white;
+  padding: 0.8rem 1.8rem;
+  border: none;
+  border-radius: 16px;
+  background: #0f172a;
+  color: white;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .btn:hover:not(:disabled) {
-  transform: translateY(-3px); /* 上にふわっと浮く */
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* 影を広げて浮遊感を出す */
-  background-color: #0f172a;
-  color: white;
+  transform: scale(1.08) translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.3);
 }
 
 .btn.secondary {
-  border-color: #94a3b8;
-  color: #64748b;
+  background: rgba(255, 255, 255, 0.8);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 .btn.secondary:hover:not(:disabled) {
-  background-color: rgba(15, 23, 42, 0.05);
-  color: #0f172a;
+  background: #f8fafc;
   border-color: #0f172a;
 }
 
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/** --- お気に入りセクション --- */
+.favorites-section {
+  margin-top: 5rem;
+  width: 100%;
+}
+
+.favorites-section h3 {
+  text-align: center;
+  color: #1e293b;
+  letter-spacing: 0.2em;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+}
+
+.fav-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* ここでタイル状に */
+  gap: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.fav-item {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  flex-direction: column; /* 縦並びに */
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  min-height: 150px;
+}
+
+.fav-item:hover {
+  transform: translateY(-10px) rotate(1deg); /* 少し傾ける遊び心 */
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.fav-item p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.delete-btn {
+  align-self: flex-end;
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  background: #ef4444;
+  color: white;
 }
 
 /* アニメーション */
