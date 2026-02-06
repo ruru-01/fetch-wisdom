@@ -12,6 +12,7 @@ const weatherCode = ref(null)
 const copyLabel = ref('こっそり持ち帰る')
 const bgImage = ref('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80')
 const favorites = ref(JSON.parse(localStorage.getItem('myFavoriteQuotes') || '[]'))
+const showToast = ref(false)
 
 // 天気を取得する関数（東京：北緯35.6895, 東経139.6917）
 const fetchWeather = async () => {
@@ -106,8 +107,13 @@ const addToFavorites = () => {
 
   // 重複チェック（同じ名言がなければ追加）
   if(!favorites.value.some(f => f.content === newFav.content)) {
-    favorites.value.push(newFav)
+    favorites.value.unshift(newFav)
     localStorage.setItem('myFavoriteQuotes', JSON.stringify(favorites.value))
+
+    showToast.value = true
+    setTimeout(() => {
+    showToast.value = false
+    }, 2000) // 2秒後に非表示
   }
 }
 
@@ -125,7 +131,6 @@ const removeFavorite = (index) => {
       <span class="city">本日の東京のご機嫌</span>
       <span>{{ temp }}°C</span>
     </div>
-
     <div class="card-wrapper">
       <div class="card">
         <h1 class="label">今日の魂に響く名言</h1>
@@ -138,7 +143,6 @@ const removeFavorite = (index) => {
             <p class="author">— {{ author }}</p>
           </div>
         </div>
-
         <div class="button-group">
           <button @click="fetchQuote" :disabled="loading" class="btn">
             次のお告げを聞く
@@ -154,20 +158,21 @@ const removeFavorite = (index) => {
           </button>
         </div>
       </div>
-
+      <Transition name="toast">
+        <div v-if="showToast" class="toast-message">
+          💖 宝箱に大切にしまいました！
+        </div>
+      </Transition>
       <div v-if="favorites.length > 0" class="favorites-section">
         <h3>宝箱にしまった言葉たち</h3>
-        <ul class="fav-list">
-          <li v-for="(fav, index) in favorites" :key="index" class="fav-item">
+        <TransitionGroup name="list" tag="ul" class="fav-list">
+          <li v-for="(fav, index) in favorites" :key="fav.content" class="fav-item">
             <p>"{{ fav.content }}"</p>
             <button @click="removeFavorite(index)" class="delete-btn">捨てちゃう</button>
           </li>
-        </ul>
+        </TransitionGroup>
       </div>
     </div>
-
-
-
   </main>
 </template>
 
@@ -396,6 +401,45 @@ const removeFavorite = (index) => {
 .delete-btn:hover {
   background: #ef4444;
   color: white;
+}
+
+/* --- 通知トーストのスタイル --- */
+.toast-message {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* 通知のアニメーション */
+.toast-enter-active, .toast-leave-active {
+  transition: all 0.5s ease;
+}
+.toast-enter-from { opacity: 0; transform: translate(-50%, 20px); }
+.toast-leave-to { opacity: 0; transform: translate(-50%, -20px); }
+
+/* リスト追加・削除のアニメーション */
+.list-enter-active, .list-leave-active {
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.list-enter-from {
+  opacity: 0;
+  transform: scale(0.5) translateY(30px);
+}
+.list-leave-to {
+  opacity: 0;
+  transform: scale(0.5);
+}
+/* リストが動く時のスムーズな移動 */
+.list-move {
+  transition: transform 0.6s ease;
 }
 
 /* アニメーション */
