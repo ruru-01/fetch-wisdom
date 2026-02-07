@@ -339,6 +339,11 @@ const removeFavorite = (index) => {
   cursor: not-allowed;
 }
 
+.btn:active:not(:disabled) {
+  transform: scale(0.95) translateY(0);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
 /** --- お気に入りセクション --- */
 .favorites-section {
   margin-top: 5rem;
@@ -387,20 +392,25 @@ const removeFavorite = (index) => {
 }
 
 .delete-btn {
-  align-self: flex-end;
   background: #fee2e2;
   color: #ef4444;
   border: none;
-  padding: 4px 12px;
-  border-radius: 10px;
-  font-size: 0.75rem;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease;
 }
 
 .delete-btn:hover {
   background: #ef4444;
   color: white;
+  transform: rotate(5deg);
+}
+
+.delete-btn:active {
+  transform: scale(0.9) rotate(-5deg); /* クリックでさらに変化 */
 }
 
 /* --- 通知トーストのスタイル --- */
